@@ -5,17 +5,22 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.hardware.Pigeon2;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
+import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
-import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.util.WPIUtilJNI;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
 
@@ -47,12 +52,44 @@ public class BasePilotable extends SubsystemBase {
       },
       new Pose2d());
 
+  Field2d field2d = new Field2d(); 
+
+
   public BasePilotable() {
 
     // Reset initial
     resetGyro();
     resetEncoders();
     resetOdometry(new Pose2d());
+
+    RobotConfig robotConfig = null; 
+    try {
+      
+      robotConfig = RobotConfig.fromGUISettings();
+
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
+    AutoBuilder.configure(
+      this :: getPose, 
+      this :: resetOdometry, 
+      this :: getChassisSpeeds,
+     (speeds,feedforward) -> conduireChassis(speeds), 
+     new PPHolonomicDriveController(new PIDConstants(5,0,0), 
+     new PIDConstants(5,0,0)), robotConfig,
+       () -> {
+      // Boolean supplier that controls when the path will be mirrored for the red
+      // alliance
+      // This will flip the path being followed to the red side of the field.
+      // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+
+      var alliance = DriverStation.getAlliance();
+      if (alliance.isPresent()) {
+        return alliance.get() == DriverStation.Alliance.Red;
+      }
+      return false;
+    }, this);
   }
 
   @Override
@@ -68,7 +105,10 @@ public class BasePilotable extends SubsystemBase {
             arriereDroite.getPosition()
         });
 
+        field2d.setRobotPose(getPose());
+        SmartDashboard.putData("Field",field2d);
         SmartDashboard.putNumber("Angle Gyro", getAngle());
+
   }
 
   ///////// MÉTHODE DONNANT DES CONSIGNES À CHAQUE MODULE
@@ -153,8 +193,9 @@ public class BasePilotable extends SubsystemBase {
   }
 
   /////////////// GYRO
+  @Logged
   public double getAngle() {
-    return -gyro.getAngle();
+    return gyro.getYaw().getValueAsDouble();
   }
 
 
@@ -162,4 +203,22 @@ public class BasePilotable extends SubsystemBase {
   public void resetGyro() {
     gyro.setYaw(0);
   }
+
+  //Path Planner
+  public ChassisSpeeds getChassisSpeeds(){
+    return Constants.kDriveKinematics.toChassisSpeeds(
+      avantDroite.getState(),avantGauche.getState(),arriereDroite.getState(),arriereGauche.getState()
+      );
+  }
+
+  public void conduireChassis(ChassisSpeeds chassisSpeeds){
+    // Ramene la vitesse en intervale de 20 ms
+    ChassisSpeeds targetSpeed = ChassisSpeeds.discretize(chassisSpeeds, 0.02);
+   
+    SwerveModuleState[] swerveModuleState = Constants.kDriveKinematics.toSwerveModuleStates(targetSpeed);
+    setModuleStates(swerveModuleState);
+  }
+
+  
+
 }

@@ -6,6 +6,8 @@ package frc.robot;
 
 import frc.robot.subsystems.BasePilotable;
 
+import com.pathplanner.lib.commands.PathPlannerAuto;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -36,7 +38,7 @@ public class RobotContainer {
 
 
   public Command getAutonomousCommand() {
-    return null;
+    return new PathPlannerAuto("Test");
   }
 
 }
