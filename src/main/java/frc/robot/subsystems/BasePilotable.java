@@ -10,7 +10,9 @@ import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
+import edu.wpi.first.epilogue.Epilogue;
 import edu.wpi.first.epilogue.Logged;
+import edu.wpi.first.epilogue.logging.EpilogueBackend;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -26,6 +28,7 @@ import frc.robot.Constants;
 
 // import frc.utils.SwerveUtils;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
 
 public class BasePilotable extends SubsystemBase {
   // Créer les moteurs swerves
@@ -109,6 +112,8 @@ public class BasePilotable extends SubsystemBase {
         SmartDashboard.putData("Field",field2d);
         SmartDashboard.putNumber("Angle Gyro", getAngle());
 
+
+     
   }
 
   ///////// MÉTHODE DONNANT DES CONSIGNES À CHAQUE MODULE
@@ -193,7 +198,6 @@ public class BasePilotable extends SubsystemBase {
   }
 
   /////////////// GYRO
-  @Logged
   public double getAngle() {
     return gyro.getYaw().getValueAsDouble();
   }
