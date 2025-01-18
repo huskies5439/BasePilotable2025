@@ -14,9 +14,9 @@ public final class Constants {
   ////////BasePilotable
     // Driving Parameters - Note that these are not the maximum capable speeds of
     // the robot, rather the allowed maximum speeds
-    public static final double maxVitesseLineaire = 1;// Vitesse linéaire max du chassis //Valeur original 4.8 a note:à
+    public static final double maxVitesseLineaire = 4;// Vitesse linéaire max du chassis //Valeur original 4.8 a note:
                                                       // ajuster
-    public static final double maxVitesseRotation = Math.PI * 1.4; // radians per second //Originale REV = 2pi soirée 22
+    public static final double maxVitesseRotation = Math.PI * 3; // radians per second //Originale REV = 2pi soirée 22
                                                                    // fevrier = 1.5
 
     public static final double maxVitesseModule = 4.46;// Vitesse maximale d'un module en m/s
