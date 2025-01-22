@@ -14,6 +14,7 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.epilogue.logging.EpilogueBackend;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -21,14 +22,14 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.units.VoltageUnit;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
-
+import frc.robot.LimelightHelpers;
 // import frc.utils.SwerveUtils;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
 
 public class BasePilotable extends SubsystemBase {
   // Créer les moteurs swerves
@@ -55,8 +56,7 @@ public class BasePilotable extends SubsystemBase {
       },
       new Pose2d());
 
-  Field2d field2d = new Field2d(); 
-
+  Field2d field2d = new Field2d();
 
   public BasePilotable() {
 
@@ -65,9 +65,12 @@ public class BasePilotable extends SubsystemBase {
     resetEncoders();
     resetOdometry(new Pose2d());
 
-    RobotConfig robotConfig = null; 
+    poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(0.7,0.7,9999999));
+
+
+    RobotConfig robotConfig = null;
     try {
-      
+
       robotConfig = RobotConfig.fromGUISettings();
 
     } catch (Exception e) {
@@ -75,24 +78,25 @@ public class BasePilotable extends SubsystemBase {
     }
 
     AutoBuilder.configure(
-      this :: getPose, 
-      this :: resetOdometry, 
-      this :: getChassisSpeeds,
-     (speeds,feedforward) -> conduireChassis(speeds), 
-     new PPHolonomicDriveController(new PIDConstants(5,0,0), 
-     new PIDConstants(5,0,0)), robotConfig,
-       () -> {
-      // Boolean supplier that controls when the path will be mirrored for the red
-      // alliance
-      // This will flip the path being followed to the red side of the field.
-      // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+        this::getPose,
+        this::resetOdometry,
+        this::getChassisSpeeds,
+        (speeds, feedforward) -> conduireChassis(speeds),
+        new PPHolonomicDriveController(new PIDConstants(5, 0, 0),
+            new PIDConstants(5, 0, 0)),
+        robotConfig,
+        () -> {
+          // Boolean supplier that controls when the path will be mirrored for the red
+          // alliance
+          // This will flip the path being followed to the red side of the field.
+          // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
 
-      var alliance = DriverStation.getAlliance();
-      if (alliance.isPresent()) {
-        return alliance.get() == DriverStation.Alliance.Red;
-      }
-      return false;
-    }, this);
+          var alliance = DriverStation.getAlliance();
+          if (alliance.isPresent()) {
+            return alliance.get() == DriverStation.Alliance.Red;
+          }
+          return false;
+        }, this);
   }
 
   @Override
@@ -108,12 +112,12 @@ public class BasePilotable extends SubsystemBase {
             arriereDroite.getPosition()
         });
 
-        field2d.setRobotPose(getPose());
-        SmartDashboard.putData("Field",field2d);
-        SmartDashboard.putNumber("Angle Gyro", getAngle());
-
-
-     
+    field2d.setRobotPose(getPose());
+    SmartDashboard.putData("Field", field2d);
+    SmartDashboard.putNumber("Angle Gyro", getAngle());
+      
+    setLimelightRobotOrientation();
+    addVisionPosition();
   }
 
   ///////// MÉTHODE DONNANT DES CONSIGNES À CHAQUE MODULE
@@ -136,9 +140,9 @@ public class BasePilotable extends SubsystemBase {
     ySpeed = -MathUtil.applyDeadband(ySpeed, deadband);
     rot = -MathUtil.applyDeadband(rot, deadband);
 
-    if (squared){//Mettre les joysticks "au carré" pour adoucir les déplacements
-      xSpeed = xSpeed*Math.abs(xSpeed);
-      ySpeed = ySpeed*Math.abs(ySpeed);
+    if (squared) {// Mettre les joysticks "au carré" pour adoucir les déplacements
+      xSpeed = xSpeed * Math.abs(xSpeed);
+      ySpeed = ySpeed * Math.abs(ySpeed);
       rot = rot * Math.abs(rot);
     }
 
@@ -150,8 +154,8 @@ public class BasePilotable extends SubsystemBase {
     var swerveModuleStates = Constants.kDriveKinematics.toSwerveModuleStates(
         fieldRelative
             ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered,
-                //getPose().getRotation()) //Quand on a de la vision correcte
-                Rotation2d.fromDegrees(getAngle())) //Quand on conduit sans vision (pratique)
+                // getPose().getRotation()) //Quand on a de la vision correcte
+                Rotation2d.fromDegrees(getAngle())) // Quand on conduit sans vision (pratique)
             : new ChassisSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered));
 
     setModuleStates(swerveModuleStates);
@@ -187,6 +191,24 @@ public class BasePilotable extends SubsystemBase {
         pose);
   }
 
+  public void setLimelightRobotOrientation(){
+    LimelightHelpers.SetRobotOrientation("limelight",
+     poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
+  }
+  public void addVisionPosition() {
+    LimelightHelpers.PoseEstimate poseEstimate = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
+    boolean doRejectUpdate = false;
+    if (Math.abs(getRate()) > 720){
+      doRejectUpdate = true ;
+    }
+    if(poseEstimate.tagCount == 0){
+      doRejectUpdate = true;
+    }
+    if(!doRejectUpdate){
+      poseEstimator.addVisionMeasurement(poseEstimate.pose, poseEstimate.timestampSeconds);
+    }
+  }
+
   ////////////// Encodeurs
   // Pas besoin de méthode pour obtenir la position des encodeurs, tout ça passe
   ////////////// directement pas la pose2D du robot
@@ -202,27 +224,26 @@ public class BasePilotable extends SubsystemBase {
     return gyro.getYaw().getValueAsDouble();
   }
 
-
+  public double getRate(){
+    return gyro.getAngularVelocityZWorld().getValueAsDouble();
+  }
 
   public void resetGyro() {
     gyro.setYaw(0);
   }
 
-  //Path Planner
-  public ChassisSpeeds getChassisSpeeds(){
+  // Path Planner
+  public ChassisSpeeds getChassisSpeeds() {
     return Constants.kDriveKinematics.toChassisSpeeds(
-      avantDroite.getState(),avantGauche.getState(),arriereDroite.getState(),arriereGauche.getState()
-      );
+        avantDroite.getState(), avantGauche.getState(), arriereDroite.getState(), arriereGauche.getState());
   }
 
-  public void conduireChassis(ChassisSpeeds chassisSpeeds){
+  public void conduireChassis(ChassisSpeeds chassisSpeeds) {
     // Ramene la vitesse en intervale de 20 ms
     ChassisSpeeds targetSpeed = ChassisSpeeds.discretize(chassisSpeeds, 0.02);
-   
+
     SwerveModuleState[] swerveModuleState = Constants.kDriveKinematics.toSwerveModuleStates(targetSpeed);
     setModuleStates(swerveModuleState);
   }
-
-  
 
 }
