@@ -3,32 +3,37 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.70625,
-        "y": 7.369249999999999
+        "x": 5.3105532786885234,
+        "y": 2.940112704918032
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.8062620368410047,
-        "y": 7.120556176726921
+        "x": 3.385034164419493,
+        "y": 1.8086033718362007
       },
       "isLocked": false,
-      "linkedName": "CoralStationCage"
+      "linkedName": "F"
     },
     {
       "anchor": {
-        "x": 3.6806909159155587,
-        "y": 5.058
+        "x": 1.5943647540983608,
+        "y": 0.7103995901639337
       },
       "prevControl": {
-        "x": 3.336121709127223,
-        "y": 5.87040064679083
+        "x": 3.443229664210138,
+        "y": 1.8424876245224242
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "L"
+      "linkedName": "CoralStationPros"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.20191923230707978,
+      "rotationDegrees": 119.99999999999999
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [],
@@ -42,13 +47,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -59.99999999999999
+    "rotation": -126.0
   },
   "reversed": false,
-  "folder": "AutoCorailCage",
+  "folder": "AutoCorailPros",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 126.0
+    "rotation": 119.99999999999999
   },
   "useDefaultConstraints": true
 }

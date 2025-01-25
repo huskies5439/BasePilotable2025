@@ -3,8 +3,9 @@
   "robotLength": 0.9,
   "holonomicMode": true,
   "pathFolders": [
+    "AutoAlgueCentre",
     "AutoCorailCage",
-    "AutoAlgueCentre"
+    "AutoCorailPros"
   ],
   "autoFolders": [],
   "defaultMaxVel": 5.0,
