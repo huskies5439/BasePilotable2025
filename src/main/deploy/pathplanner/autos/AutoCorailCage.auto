@@ -11,6 +11,12 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "sortir"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "IToCoralStationCage"

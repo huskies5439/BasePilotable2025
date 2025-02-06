@@ -3,35 +3,42 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 5.15775,
-        "y": 5.14625
+        "x": 2.0,
+        "y": 7.0
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.942,
-        "y": 5.18525
+        "x": 3.0,
+        "y": 7.0
       },
       "isLocked": false,
-      "linkedName": "AlgueJI"
+      "linkedName": null
     },
     {
       "anchor": {
-        "x": 6.34725,
-        "y": 0.5344999999999993
+        "x": 3.0,
+        "y": 7.0
       },
       "prevControl": {
-        "x": 6.54225,
-        "y": 1.8409999999999989
+        "x": 2.0,
+        "y": 7.0
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Processeur"
+      "linkedName": null
     }
   ],
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "monte",
+      "waypointRelativePos": 0.4992555831265453,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 1.0,
     "maxAcceleration": 1.0,
@@ -42,13 +49,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -90.0
+    "rotation": 0.0
   },
   "reversed": false,
-  "folder": "AutoAlgueCentre",
+  "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -119.99999999999999
+    "rotation": 0.0
   },
   "useDefaultConstraints": true
 }
