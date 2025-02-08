@@ -29,6 +29,12 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "sortir"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "LToCoralStationCage"
@@ -41,6 +47,12 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "sortir"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "KToCoralStationCage"
@@ -50,6 +62,12 @@
           "type": "path",
           "data": {
             "pathName": "CoralStationCageToJ"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "sortir"
           }
         },
         {
